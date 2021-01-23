@@ -1,11 +1,9 @@
 from PIL import Image
 import numpy as np
 import random
-from time import perf_counter
 
 
 def evolve(image, image2):
-    timer = perf_counter()
     # female image
     img = np.array(image)
     # male image
@@ -53,6 +51,7 @@ def evolve(image, image2):
                     img[i][j - 1 + y] = [0, random.randint(0, 255), 0, 255]
                     img2[i][j - 1 + y] = [0, random.randint(0, 255), 0, 255]
                 break
+
     img = Image.fromarray(np.uint8(img))
     img = img.rotate(-90)
     img = np.array(img)
@@ -61,5 +60,5 @@ def evolve(image, image2):
     img2 = img2.rotate(-90)
     img2 = np.array(img2)
     img2 = Image.fromarray(np.uint8(img2))
-    print(perf_counter()-timer)
+
     return img, img2

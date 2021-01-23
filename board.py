@@ -13,6 +13,7 @@ people = []
 human_beings_counter = 0
 year = 0
 result = {}
+maxy = []
 
 
 def make_human(x=None, y=None, mother=None, father=None):
@@ -40,7 +41,9 @@ class Board:
 
     def run(self):
         while not quit_window():
-            self.window.fill((110, 106, 113))
+            # background color
+            # self.window.fill((110, 106, 113))
+            self.window.fill((0, 0, 0))
             if len(people) == 0:
                 plt.bar(*zip(*result.items()))
                 plt.xlabel("year")
@@ -56,7 +59,7 @@ class Board:
 
 def pil_image_to_surface(pil_image):
     return pygame.image.fromstring(
-        pil_image.tobytes(), pil_image.size, pil_image.mode)
+        pil_image.tobytes(), pil_image.size, pil_image.mode).convert_alpha()
 
 
 class Person:
@@ -69,6 +72,7 @@ class Person:
         self.y = args[1]
         self.mother = args[2]
         self.father = args[3]
+        self.name = human_beings_counter
         self.age = 0
         self.move_horizontal = True
         self.move_vertical = True
@@ -117,20 +121,20 @@ class Person:
             human.raw_image = [f_img, m_img][human.gender]
 
     def birth(self, human):
-        # is self haven't gaven birth in 4 seconds
-        if self.last_collision + 4 < time.perf_counter():
+        # is self haven't gaven birth in 3 seconds
+        if self.last_collision + 3 < time.perf_counter():
             # is self or human aren't killers
             if self.killer != 0:
                 # is self or human aren't ill
                 if self.illness != 0 and human.illness != 0:
                     if self.gender != human.gender:
-                        if self.age > 20:
-                            if human.age > 20:
+                        if self.age > 10:
+                            if human.age > 10:
                                 for i in range(random.randint(0, 3)):
                                     mother = [self, human][self.gender]
                                     father = [human, self][self.gender]
 
-                                    # create healthy person
+                                    # create a healthy person
                                     make_human(self.x, self.y, mother, father)
                                 self.last_collision = time.perf_counter()
 
@@ -139,6 +143,7 @@ class Person:
                     human.illness = 0
                     human.speed = 5
                     human.raw_image = ill
+                    human.image = pil_image_to_surface(ill)
                     self.last_collision = time.perf_counter()
 
                 # if human is ill
@@ -156,7 +161,13 @@ class Person:
                 human.die()
 
     def die(self):
-        people.remove(self)
+        # sometimes when two killers murder one object it could raise an error
+        try:
+            # boots could make killers immortal
+            self.time_to_end_boost = 0
+            people.remove(self)
+        except (Exception, IndexError):
+            pass
 
     def make_older(self):
         self.age += 0.1
@@ -217,16 +228,16 @@ class Person:
         # add 0.1 year to objects's age
         self.make_older()
 
-        if self.age > 54:
+        if self.age > 70:
             self.die()
-        elif self.age > 30 and self.illness == 0:
+        elif self.age > 12 and self.illness == 0:
             self.die()
-        elif random.randint(0, 2000 - (int(self.age) * 20)) == 0:
+        elif random.randint(0, 2000 - (int(self.age) * 13)) == 0:
             self.die()
 
     def collision(self):
         for human in people:
-            if self != human:
+            if self.name != human.name:
                 if human.x - 30 < self.x < human.x + 30 and human.y - 30 < self.y < human.y + 30:
 
                     # create children
